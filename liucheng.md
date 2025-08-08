@@ -1189,3 +1189,137 @@ Withdraw: 提现Token1和领取Token2奖励
 Profile: 显示用户详细信息和代币余额
 
 这个实现提供了完整的质押系统前端和本地开发环境，你可以根据需要进一步扩展和定制。
+
+
+
+在 Hardhat-Vue 项目中，Vue3 项目应该作为一个独立的子项目存在，拥有自己的 package.json 和 node_modules。以下是详细说明和初始化步骤：
+
+1. 项目结构建议
+推荐的结构如下（Vue 项目作为独立子目录）：
+
+text
+hardhat-vue-project/
+├── hardhat/               # Hardhat 项目
+│   ├── contracts/
+│   ├── scripts/
+│   ├── package.json       # Hardhat 的依赖
+│   └── node_modules/
+└── vue-project/           # Vue3 项目
+    ├── src/
+    ├── package.json       # Vue 的依赖
+    └── node_modules/
+2. Vue3 项目初始化步骤
+方法一：从零初始化（推荐）
+进入项目根目录：
+
+bash
+cd hardhat-vue-project
+创建 Vue 项目：
+
+bash
+npm create vue@latest vue-project
+按提示选择配置（推荐勾选 Pinia 和 Router）。
+
+安装依赖：
+
+bash
+cd vue-project
+npm install ethers @metamask/detect-provider @pinia/npm-plugin
+配置 Hardhat 部署输出：
+修改 Hardhat 的 deploy.js 脚本，将合约 ABI 和地址输出到 vue-project/src/contracts/ 目录（如你之前的代码所示）。
+
+方法二：手动初始化
+如果已有 vue-project 目录但未初始化：
+
+初始化 package.json：
+
+bash
+cd vue-project
+npm init -y
+安装 Vue3 核心依赖：
+
+bash
+npm install vue @vue/compiler-sfc
+npm install --save-dev vite @vitejs/plugin-vue
+安装其他必要依赖：
+
+bash
+npm install ethers @metamask/detect-provider pinia vue-router
+3. 关键配置说明
+Vue 项目的 package.json 示例
+json
+{
+  "name": "vue-project",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "ethers": "^6.10.0",
+    "pinia": "^2.1.7",
+    "vue": "^3.3.0",
+    "vue-router": "^4.2.5"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^4.4.0",
+    "vite": "^5.0.0"
+  }
+}
+**为什么需要独立的 node_modules？
+依赖隔离：Hardhat 和 Vue 的依赖完全不同（如 Hardhat 需要 @nomicfoundation/hardhat-toolbox，Vue 需要 vite）。
+
+避免冲突：某些依赖（如 TypeScript 版本）可能在两个项目中要求不同。
+
+4. 联调时的注意事项
+跨项目路径引用：
+
+在 Hardhat 的 deploy.js 中，确保正确输出合约文件到 Vue 项目的 src/contracts/：
+
+javascript
+const contractsDir = __dirname + "/../vue-project/src/contracts";
+Vue 环境变量配置：
+在 vue-project/.env 中定义本地链 RPC URL：
+
+text
+VITE_LOCAL_RPC_URL=http://localhost:8545
+启动顺序：
+
+先启动 Hardhat 节点：
+
+bash
+cd hardhat
+npx hardhat node
+再启动 Vue 项目：
+
+bash
+cd ../vue-project
+npm run dev
+5. 常见问题解决
+问题：Vue 项目找不到合约 ABI
+原因：Hardhat 部署脚本未正确输出文件。
+
+解决：
+
+检查 hardhat/scripts/deploy.js 中的输出路径。
+
+确保运行了部署脚本：
+
+bash
+cd hardhat
+npx hardhat run scripts/deploy.js --network localhost
+问题：MetaMask 无法连接本地链
+解决：
+
+在 MetaMask 中添加网络：
+
+RPC URL: http://localhost:8545
+
+Chain ID: 1337 (Hardhat 默认)
+
+从 Hardhat 的控制台日志中导入测试账户私钥。
+
+7
