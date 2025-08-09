@@ -11,4 +11,6 @@ REPORT_GAS=true npx hardhat test
 npx hardhat node
 npx hardhat ignition deploy ./ignition/modules/Lock.js
 ```
+问题：
+vue3 项目拿不到 hardhat depoly 之后合约的abi
 

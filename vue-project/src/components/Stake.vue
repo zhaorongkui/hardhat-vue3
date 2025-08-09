@@ -85,9 +85,11 @@ const approveToken1 = async () => {
   try {
     isApproving.value = true;
     error.value = '';
-    
+    console.log(ethers.MaxUint256);
+    console.log(stakingContract.value.target);
+
     const tx = await token1Contract.value.approve(
-      stakingContract.value.address,
+      stakingContract.value.target,
       ethers.MaxUint256
     );
     
@@ -101,32 +103,94 @@ const approveToken1 = async () => {
   }
 };
 
+// const stake = async () => {
+//   try {
+//     isStaking.value = true;
+//     error.value = '';
+    
+//     const amount = ethers.parseEther(stakeAmount.value.toString());
+//     console.log(amount);
+//     console.log(stakingContract.value);
+//     const tx = await stakingContract.value.stake(amount);
+//     console.log(tx);
+//     transactionHash.value = tx.hash;
+    
+//     await tx.wait();
+    
+//     // 更新数据
+//     await stakingStore.updateUserInfo(stakingContract.value, currentAccount.value);
+//     await stakingStore.updateGlobalInfo(stakingContract.value);
+//     await stakingStore.updateTokenBalances(
+//       token1Contract.value,
+//       null,
+//       currentAccount.value
+//     );
+    
+//     stakeAmount.value = 0;
+//   } catch (err) {
+//     error.value = err.message;
+//   } finally {
+//     isStaking.value = false;
+//   }
+// };
 const stake = async () => {
   try {
     isStaking.value = true;
     error.value = '';
     
     const amount = ethers.parseEther(stakeAmount.value.toString());
-    const tx = await stakingContract.value.stake(amount);
+    
+    // 1. 检查余额
+    const balance = await token1Contract.value.balanceOf(currentAccount.value);
+    if (balance < amount) {
+      throw new Error("余额不足");
+    }
+    console.log(balance);
+    console.log(currentAccount.value); // 账户地址
+    console.log(stakingContract.value.target);
+    // 2. 检查批准额度
+    const allowance = await token1Contract.value.allowance(
+      currentAccount.value,
+      stakingContract.value.target
+    );
+    if (allowance < amount) {
+      throw new Error(`请先批准代币 (当前批准额度: ${ethers.formatEther(allowance)})`);
+    }
+    
+    // 3. 执行质押
+    const tx = await stakingContract.value.stake(amount, {
+      gasLimit: 1000000 // 明确设置gas限制
+    });
     
     transactionHash.value = tx.hash;
-    await tx.wait();
+    const receipt = await tx.wait();
     
-    // 更新数据
-    await stakingStore.updateUserInfo(stakingContract.value, currentAccount.value);
-    await stakingStore.updateGlobalInfo(stakingContract.value);
-    await stakingStore.updateTokenBalances(
-      token1Contract.value,
-      null,
-      currentAccount.value
-    );
+    // 4. 检查交易状态
+    if (receipt.status === 0) {
+      throw new Error("交易在链上失败");
+    }
     
-    stakeAmount.value = 0;
+    // 更新数据...
   } catch (err) {
-    error.value = err.message;
+    console.error("质押失败详情:", err);
+    error.value = parseContractError(err);
   } finally {
     isStaking.value = false;
   }
+};
+
+// 错误解析工具函数
+const parseContractError = (err) => {
+  if (err.code === 'CALL_EXCEPTION') {
+    return "合约调用验证失败 (可能参数无效)";
+  }
+  if (err.data && stakingContract.value) {
+    try {
+      const decoded = stakingContract.value.interface.parseError(err.data);
+      return `合约错误: ${decoded.name}`;
+    } catch {}
+  }
+  return err.reason || err.message;
 };
 
 watch([isConnected, token1Contract, stakingContract], () => {

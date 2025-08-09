@@ -2,6 +2,7 @@ import { ref, onMounted } from 'vue';
 import { ethers } from 'ethers';
 import detectEthereumProvider from '@metamask/detect-provider';
 import StakingRewards from '@/contracts/StakingRewards.json';
+// import StakingRewards from '../../../contracts/StakingRewards.sol/StakingRewards.json';
 import Token1 from '@/contracts/Token1.json';
 import Token2 from '@/contracts/Token2.json';
 import contractAddresses from '@/contracts/contract-addresses.json';
@@ -47,41 +48,65 @@ export function useStaking() {
     }
   };
   
-  // 连接钱包
   const connectWallet = async () => {
     try {
-      await window.ethereum.request({ method: 'eth_requestAccounts' });
-      signer.value = await provider.value.getSigner();
-      currentAccount.value = await signer.value.getAddress();
-      networkId.value = await window.ethereum.request({ method: 'eth_chainId' });
+      // 1. 检查MetaMask是否可用
+      if (!window.ethereum) throw new Error('MetaMask未安装')
+  
+      // 2. 创建新的Provider实例 (避免响应式代理问题)
+      const freshProvider = new ethers.BrowserProvider(window.ethereum)
       
-      // 初始化合约
+      // 3. 请求账户访问
+      await window.ethereum.request({ method: 'eth_requestAccounts' })
+      
+      // 4. 获取Signer (关键修复)
+      const freshSigner = await freshProvider.getSigner()
+      
+      // 5. 更新响应式变量
+      provider.value = freshProvider
+      signer.value = freshSigner
+      currentAccount.value = await freshSigner.getAddress()
+      
+      // 6. 获取网络ID (安全方式)
+      const network = await freshProvider.getNetwork()
+      networkId.value = String(network.chainId)
+      
+      // 7. 初始化合约
+      console.log(1111111, contractAddresses.StakingRewards, );
+      console.log(2222222, freshSigner );
+      console.log(33333333, StakingRewards.abi );
+      
       stakingContract.value = new ethers.Contract(
         contractAddresses.StakingRewards,
         StakingRewards.abi,
-        signer.value
-      );
-      
+        freshSigner // 使用新鲜signer实例
+      )
+      console.log(stakingContract.value);
       token1Contract.value = new ethers.Contract(
         contractAddresses.Token1,
         Token1.abi,
-        signer.value
-      );
-      
+        freshSigner
+      )
+      console.log('token1', contractAddresses.Token1);
       token2Contract.value = new ethers.Contract(
         contractAddresses.Token2,
         Token2.abi,
-        signer.value
-      );
+        freshSigner
+      )
+      console.log( 'token2',contractAddresses.Token2);
+      isConnected.value = true
+      return true
       
-      isConnected.value = true;
-      return true;
     } catch (err) {
-      error.value = err.message;
-      return false;
+      console.error('钱包连接失败:', err)
+      error.value = err.code === 4001 
+        ? '用户拒绝了连接请求' 
+        : err.message || '未知错误'
+      isConnected.value = false
+      return false
     }
-  };
-  
+  }
+
   // 检查是否已连接
   const checkConnected = async () => {
     const accounts = await window.ethereum.request({ method: 'eth_accounts' });
@@ -111,3 +136,87 @@ export function useStaking() {
     checkConnected
   };
 }
+
+// import { ref, onMounted } from 'vue'
+// import { ethers } from 'ethers'
+
+// export function useEthers() {
+//   const provider = ref(null)
+//   const signer = ref(null)
+//   const isConnected = ref(false)
+//   const error = ref(null)
+
+//   // 更安全的初始化方法
+//   const initProvider = async () => {
+//     try {
+//       if (window.ethereum) {
+//         // 监听账户变化
+//         window.ethereum.on('accountsChanged', (accounts) => {
+//           if (accounts.length === 0) {
+//             isConnected.value = false
+//           }
+//         })
+
+//         // 监听链变化
+//         window.ethereum.on('chainChanged', () => {
+//           window.location.reload()
+//         })
+
+//         // 使用更兼容的方式初始化 provider
+//         provider.value = new ethers.BrowserProvider(window.ethereum)
+        
+//         try {
+//           const accounts = await window.ethereum.request({ method: 'eth_accounts' })
+//           if (accounts.length > 0) {
+//             signer.value = await provider.value.getSigner()
+//             isConnected.value = true
+//           }
+//         } catch (e) {
+//           console.log("No authorized accounts")
+//         }
+        
+//         return true
+//       } else {
+//         error.value = 'Please install MetaMask!'
+//         return false
+//       }
+//     } catch (err) {
+//       error.value = err.message
+//       return false
+//     }
+//   }
+
+//   // 连接钱包
+//   const connectWallet = async () => {
+//     try {
+//       error.value = null
+//       if (!provider.value) await initProvider()
+      
+//       const accounts = await window.ethereum.request({ 
+//         method: 'eth_requestAccounts' 
+//       })
+      
+//       signer.value = await provider.value.getSigner()
+//       isConnected.value = true
+//       return accounts[0]
+//     } catch (err) {
+//       error.value = err.message
+//       isConnected.value = false
+//       throw err
+//     }
+//   }
+
+//   // 初始化时检测
+//   onMounted(async () => {
+//     await initProvider()
+//   })
+
+//   return {
+//     provider,
+//     signer,
+//     isConnected,
+//     error,
+//     connectWallet,
+//     initProvider
+//   }
+// }
