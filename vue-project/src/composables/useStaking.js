@@ -8,15 +8,15 @@ import Token2 from '@/contracts/Token2.json';
 import contractAddresses from '@/contracts/contract-addresses.json';
 
 export function useStaking() {
-  const provider = ref(null);
-  const signer = ref(null);
-  const stakingContract = ref(null);
-  const token1Contract = ref(null);
-  const token2Contract = ref(null);
-  const isConnected = ref(false);
-  const currentAccount = ref('');
-  const networkId = ref('');
-  const error = ref('');
+  const provider = ref(null); // 以太坊提供者实例（与区块链交互的入口）
+  const signer = ref(null); // 签名者实例（代表已授权的账户，用于发送交易）
+  const stakingContract = ref(null); // 智能合约实例
+  const token1Contract = ref(null);// 智能合约实例
+  const token2Contract = ref(null);// 智能合约实例
+  const isConnected = ref(false); //是否已连接钱包
+  const currentAccount = ref(''); // 当前连接的钱包地址
+  const networkId = ref(''); // 当前网络 ID
+  const error = ref(''); // 错误信息
   
   // 初始化以太坊提供者
   const initEthereum = async () => {
@@ -47,7 +47,7 @@ export function useStaking() {
       return false;
     }
   };
-  
+  // 连接钱包的核心逻辑
   const connectWallet = async () => {
     try {
       // 1. 检查MetaMask是否可用
@@ -75,7 +75,7 @@ export function useStaking() {
       console.log(1111111, contractAddresses.StakingRewards, );
       console.log(2222222, freshSigner );
       console.log(33333333, StakingRewards.abi );
-      
+      // 初始化三个智能合约实例（质押合约、代币 1 合约、代币 2 合约）
       stakingContract.value = new ethers.Contract(
         contractAddresses.StakingRewards,
         StakingRewards.abi,
@@ -107,7 +107,7 @@ export function useStaking() {
     }
   }
 
-  // 检查是否已连接
+  // 检查是否已有连接的账户
   const checkConnected = async () => {
     const accounts = await window.ethereum.request({ method: 'eth_accounts' });
     if (accounts.length > 0) {
