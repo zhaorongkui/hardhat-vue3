@@ -38,7 +38,8 @@ contract StakingRewards {
         require(msg.sender == owner, "not owner");
         _; // 执行函数主体
     }
-
+    
+    /* 奖励状态同步 */
     modifier updateReward(address _account) {
         rewardPerTokenStored = rewardPerToken();  // 更新当前每单位质押代币的奖励
         updatedAt = lastTimeRewardApplicable();  // 更新最近状态时间为当前有效时间
