@@ -84,6 +84,7 @@ const checkAllowance = async () => {
   approvalNeeded.value = allowance <= 0;
 };
 
+// 批准事件，当质押的数量为负数时得需要批准
 const approveToken1 = async () => {
   // 当 approvalNeeded 为 true 时，用户需执行此操作授权质押合约使用其 GLD1 代币。
   try {
