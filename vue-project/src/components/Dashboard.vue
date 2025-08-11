@@ -10,22 +10,22 @@
       <div class="stats-grid">
         <div class="stat-card">
           <h3>我的质押数量</h3>
-          <p>{{ formattedUserStaked }} GLD1</p>
+          <p style="word-break: break-all;">{{ formattedUserStaked }} GLD1</p>
         </div>
 
         <div class="stat-card">
           <h3>我的奖励</h3>
-          <p>{{ formattedUserReward }} GLD2</p>
+          <p style="word-break: break-all;">{{ formattedUserReward }} GLD2</p>
         </div>
 
         <div class="stat-card">
           <h3>总质押量</h3>
-          <p>{{ formattedTotalStaked }} GLD1</p>
+          <p style="word-break: break-all;">{{ formattedTotalStaked }} GLD1</p>
         </div>
 
         <div class="stat-card">
           <h3>奖励速率</h3>
-          <p>{{ ethers.formatEther(rewardRate) }} GLD2/秒</p>
+          <p style="word-break: break-all;">{{ ethers.formatEther(rewardRate) }} GLD2/秒</p>
         </div>
       </div>
 
