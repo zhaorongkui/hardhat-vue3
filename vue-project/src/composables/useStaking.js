@@ -2,7 +2,7 @@ import { ref, onMounted } from 'vue';
 import { ethers } from 'ethers';
 import detectEthereumProvider from '@metamask/detect-provider';
 
-import StakingRewards from '../../../artifacts/contracts/StakingSward.sol/StakingRewards.json';
+import StakingRewards from '../../../artifacts/contracts/StakingSward..sol/StakingRewards.json';
 import Token1 from '../../../artifacts/contracts/Token1.sol/Token1.json';
 import Token2 from '../../../artifacts/contracts/Token2.sol/Token2.json';
 

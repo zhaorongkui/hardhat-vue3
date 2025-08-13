@@ -46,7 +46,7 @@ tsconfig.app.json 配置文件作用：
   }
 }
 
-tsconfig.node.json 配置文件作用：
+tsconfig.node.json 配置文件作用： 
 
 {
   "extends": "@tsconfig/node22/tsconfig.json",
