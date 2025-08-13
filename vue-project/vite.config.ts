@@ -20,4 +20,7 @@ export default defineConfig({
       '@artifacts': path.resolve(__dirname, '../artifacts'), 
     },
   },
+  optimizeDeps: {
+    include: ['**/*.json'],
+  },
 })
