@@ -1,10 +1,14 @@
 import { ref, onMounted } from 'vue';
 import { ethers } from 'ethers';
 import detectEthereumProvider from '@metamask/detect-provider';
-// import StakingRewards from '@/contracts/StakingRewards.json';
-import StakingRewards from '@artifacts/contracts/StakingSward.sol/StakingRewards.json';
-import Token1 from '@artifacts/contracts/Token1.sol/Token1.json';
-import Token2 from '@artifacts/contracts/Token2.sol/Token2.json';
+import StakingRewards from '@/contracts/StakingRewards.json';
+import Token1 from '@/contracts/Token1.json';
+import Token2 from '@/contracts/Token2.json';
+// import StakingRewards from '@artifacts/contracts/StakingSward.sol/StakingRewards.json';
+// import StakingRewards from '@artifacts/'
+// import Token1 from 'D:/workspace/workspace/web3.0/第三周/hardhat-vue3/artifacts/contracts/Token1.sol/Token1.json';
+// import Token1 from '@artifacts/contracts/Token1.sol/Token1.json';
+// import Token2 from '@artifacts/contracts/Token2.sol/Token2.json';
 import contractAddresses from '@/contracts/contract-addresses.json';
 
 export function useStaking() {

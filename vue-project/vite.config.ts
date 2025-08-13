@@ -5,6 +5,8 @@ import vue from '@vitejs/plugin-vue'
 import vueDevTools from 'vite-plugin-vue-devtools'
 import path from 'path';
 
+
+console.log('99999Artifacts path:', path.resolve(__dirname, '../artifacts'));
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
