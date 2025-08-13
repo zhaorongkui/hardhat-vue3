@@ -31,3 +31,18 @@ npm run dev
 ```sh
 npm run build
 ```
+# vue3项目拿不到项目外边的文件，在vite.config.ts中配置特殊路径：@artifacts': path.resolve(__dirname, '../artifacts')
+# import StakingRewards from '@artifacts/contracts/StakingSward.sol/StakingRewards.json'; // 引入的方法
+<!-- export default defineConfig({
+  plugins: [
+    vue(),
+    vueDevTools(),
+  ],
+  resolve: {
+    alias: {
+      '@': fileURLToPath(new URL('./src', import.meta.url)),
+      // 别名 key 自定义，value 是项目根绝对路径，可根据实际调整
+      '@artifacts': path.resolve(__dirname, '../artifacts'), 
+    },
+  },
+}) -->
