@@ -32,7 +32,7 @@
           {{ isClaiming ? '处理中...' : '领取奖励' }}
         </button>
 
-        <button style="margin-left:15px;" @click="refresh">
+        <button style="margin-left:15px;" @click="refreshReward">
           {{ '更新奖励' }}
         </button>
       </div>
@@ -51,7 +51,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted, onUnmounted, watch  } from 'vue';
 import { useStaking } from '@/composables/useStaking'; // 引入钱包连接相关的 composable（封装钱包连接、合约实例等核心逻辑）
 import { useStakingStore } from '@/stores/staking'; // 引入 Pinia 状态管理（存储用户质押数据、奖励数据等全局状态）
 import { storeToRefs } from 'pinia'; // 将 Pinia 状态转为响应式引用
@@ -65,6 +65,12 @@ const {
   token1Contract,
   token2Contract,
   signer,
+
+  rewardAmount, // 新增的响应式奖励金额
+  startRewardRefresh,
+  stopRewardRefresh,
+  fetchReward,
+
   error 
 } = useStaking();
 
@@ -146,14 +152,56 @@ const getReward = async () => {
   }
 };
 
-// 实时刷新获取的奖励
-const refresh = async () => { // 参数是账户地址
-  console.log(4545454, signer.value);
-  console.log(6666666, stakingContract.value);
-  const astx = await stakingContract.value.earned(signer.value.address);
-  console.log(astx);
-  // await astx();
-}
+// // 实时刷新获取的奖励
+// const refresh = async () => { // 参数是账户地址
+//   console.log(4545454, signer.value);
+//   console.log(6666666, stakingContract.value);
+//   const astx = await stakingContract.value.earned(signer.value.address);
+//   console.log(astx);
+//   // await astx();
+// }
+
+
+
+
+// 实时刷新奖励
+const startAutoRefresh = () => {
+  if (stakingContract.value && signer.value?.address) {
+    startRewardRefresh(
+      stakingContract.value,
+      signer.value.address,
+      1000 // 1秒刷新一次
+    );
+  }
+};
+
+// 手动刷新
+const refreshReward = async () => {
+  if (stakingContract.value && signer.value?.address) {
+    console.log('进入手动刷新判断stakingContract.value',stakingContract.value);
+    console.log('进入手动刷新判断signer.value.address', signer.value.address);
+    let res = await fetchReward(stakingContract.value, signer.value.address);
+    console.log('刷新手动', res);
+  } else {
+    console.log(stakingContract.value,  signer.value?.address)
+  }
+};
+
+// 组件挂载时启动自动刷新
+onMounted(() => {
+  if (isConnected.value) {
+    startAutoRefresh();
+  }
+});
+
+// 监听钱包连接状态
+watch(isConnected, (connected) => {
+  if (connected) {
+    startAutoRefresh();
+  } else {
+    stopRewardRefresh();
+  }
+});
 /* 
 关键点：
 

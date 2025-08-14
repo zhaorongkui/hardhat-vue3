@@ -1,4 +1,4 @@
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import { ethers } from 'ethers';
 import detectEthereumProvider from '@metamask/detect-provider';
 
@@ -25,6 +25,9 @@ export function useStaking() {
   const currentAccount = ref(''); // 当前连接的钱包地址
   const networkId = ref(''); // 当前网络 ID
   const error = ref(''); // 错误信息
+
+  const rewardAmount = ref('0'); // 响应式奖励金额
+  let refreshInterval = null; // 声明定时器
   
   // 初始化以太坊提供者
   const initEthereum = async () => {
@@ -132,6 +135,41 @@ export function useStaking() {
     await initEthereum();
     await checkConnected();
   });
+
+  // 获取奖励金额的方法
+  const fetchReward = async (stakingContract, account) => {
+    if (!stakingContract || !account) return;
+    console.log(111111,stakingContract)
+    console.log(222222, account)
+    try {
+      const reward = await stakingContract.earned(account);
+      rewardAmount.value = ethers.formatEther(reward);
+      console.log(23232323, rewardAmount);
+    } catch (err) {
+      console.error('获取奖励失败:', err);
+    }
+  };
+
+  // 启动定时刷新
+  const startRewardRefresh = (stakingContract, account, interval = 1000) => {
+    stopRewardRefresh(); // 先停止已有的定时器
+    fetchReward(stakingContract, account); // 立即获取一次
+    refreshInterval = setInterval(
+      () => fetchReward(stakingContract, account),
+      interval
+    );
+  };
+
+  // 停止刷新
+  const stopRewardRefresh = () => {
+    if (refreshInterval) {
+      clearInterval(refreshInterval);
+      refreshInterval = null;
+    }
+  };
+
+  // 组件卸载时自动清理
+  onUnmounted(stopRewardRefresh);
   
   return {
     provider,
@@ -144,7 +182,12 @@ export function useStaking() {
     networkId,
     error,
     connectWallet,
-    checkConnected
+    checkConnected,
+    rewardAmount,
+    // 以下是新增的
+    fetchReward,
+    startRewardRefresh,
+    stopRewardRefresh
   };
 }
 
