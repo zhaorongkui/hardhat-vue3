@@ -96,12 +96,15 @@ export function useStaking() {
         freshSigner
       )
       console.log('token1', contractAddresses.Token1);
+      console.log('token1ABI', Token1.abi);
+      console.log('token1Contract', token1Contract.value);
       token2Contract.value = new ethers.Contract(
         contractAddresses.Token2,
         Token2.abi,
         freshSigner
       )
       console.log( 'token2',contractAddresses.Token2);
+      console.log('token2Contract', token2Contract.value);
       isConnected.value = true
       return true
       

@@ -4,7 +4,13 @@ This project demonstrates a basic Hardhat use case. It comes with a sample contr
 
 Try running some of the following tasks:
 
+
+token1 质押代码
+token2 奖励代币
+stakingSward 质押收益合约
+
 ```shell
+npx hardhat compile  #编译合约
 npx hardhat help
 npx hardhat test
 REPORT_GAS=true npx hardhat test

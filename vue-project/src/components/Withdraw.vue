@@ -31,6 +31,10 @@
         <button @click="getReward" :disabled="isClaiming || formattedUserReward <= 0">
           {{ isClaiming ? '处理中...' : '领取奖励' }}
         </button>
+
+        <button style="margin-left:15px;" @click="refresh">
+          {{ '更新奖励' }}
+        </button>
       </div>
       
       <div v-if="transactionHash" class="transaction-info">
@@ -60,6 +64,7 @@ const {
   stakingContract,
   token1Contract,
   token2Contract,
+  signer,
   error 
 } = useStaking();
 
@@ -74,7 +79,7 @@ const withdrawAmount = ref(0); // 绑定输入框的提现数量（用户输入�
 const isWithdrawing = ref(false); // 提现操作的加载状态（防止重复提交）
 const isClaiming = ref(false); // 领取奖励操作的加载状态
 const transactionHash = ref(''); // 存储交易哈希（供用户查询区块链交易）// 领取奖励操作的加载状态
-
+// 提现做法
 const withdraw = async () => {
   try {
     isWithdrawing.value = true; // 标记提现操作开始（显示"处理中"状态）
@@ -107,11 +112,11 @@ const withdraw = async () => {
   }
   /* 
   单位转换：用户输入的是 “GLD1 数量”（如 2.5），需通过 ethers.parseEther 转为合约交互所需的最小单位（wei）。
-  交易确认：tx.wait() 确保交易被区块链打包确认后再更新状态，避免本地状态与链上数据不一致。
+  交易确认：tx.wait() 确保交易被区块链打包确认后再更新状态，避免本地状态与链上数据不一致。getReward
   数据同步：提现后需同步用户质押量、代币余额等数据，保证页面显示最新状态。
    */
 };
-
+// 领取奖励
 const getReward = async () => {
   try {
     isClaiming.value = true; // 标记领取奖励操作开始
@@ -125,6 +130,7 @@ const getReward = async () => {
     
     // 更新数据
     // 4. 交易成功后更新状态（重点同步奖励数据和 GLD2 余额）
+    console.log(9000, currentAccount.value)
     await stakingStore.updateUserInfo(stakingContract.value, currentAccount.value); // 更新用户奖励信息
     await stakingStore.updateTokenBalances( // 更新 GLD2 余额（GLD1 余额不变，传 null 优化性能）
       null,
@@ -139,6 +145,15 @@ const getReward = async () => {
     isClaiming.value = false;
   }
 };
+
+// 实时刷新获取的奖励
+const refresh = async () => { // 参数是账户地址
+  console.log(4545454, signer.value);
+  console.log(6666666, stakingContract.value);
+  const astx = await stakingContract.value.earned(signer.value.address);
+  console.log(astx);
+  // await astx();
+}
 /* 
 关键点：
 

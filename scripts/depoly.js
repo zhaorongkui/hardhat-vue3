@@ -37,6 +37,7 @@ async function main() {
 
   // 设置奖励持续时间
   const durationTx = await staking.setRewardsDuration(7 * 24 * 60 * 60);
+  // const durationTx = await staking.setRewardsDuration(1);
   await durationTx.wait();
   console.log("Rewards duration set to 7 days");
   

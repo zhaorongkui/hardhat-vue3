@@ -90,8 +90,8 @@ const approveToken1 = async () => {
   try {
     isApproving.value = true; // 开始加载
     error.value = ''; // 清空之前的错误
-    console.log(ethers.MaxUint256);
-    console.log(stakingContract.value.target);
+    console.log('批准最大额度（2^256-1，足够大的数值）', ethers.MaxUint256);
+    console.log('质押合约地址（target 即地址）', stakingContract.value.target);
 
     // 调用 ERC20 标准方法 approve：批准质押合约使用最大额度（避免重复批准）
     const tx = await token1Contract.value.approve(
@@ -116,14 +116,18 @@ const stake = async () => {
 
     const amount = ethers.parseEther(stakeAmount.value.toString()); // 将用户输入的数量（ETH 单位）转为 wei 单位（合约交互需用最小单位）
 
+    console.log('账户地址:', currentAccount.value); // 账户地址
+    console.log('质押合约地址（target 即地址）', stakingContract.value.target);
+    // console.log('token1Contract', await token1Contract.value.balanceOf());
+
     // 验证 1：检查用户 GLD1 余额是否足够
     const balance = await token1Contract.value.balanceOf(currentAccount.value);
+    console.log(999999, balance);
     if (balance < amount) {
       throw new Error('余额不足');
     }
     console.log(balance);
-    console.log(currentAccount.value); // 账户地址
-    console.log(stakingContract.value.target);
+    
     // 2. 检查批准额度
     // 验证 2：检查批准额度是否足够（防止用户批准后未刷新状态）
     const allowance = await token1Contract.value.allowance(
