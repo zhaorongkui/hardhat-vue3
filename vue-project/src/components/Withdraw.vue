@@ -28,6 +28,8 @@
       <div class="reward-section">
         <h3>奖励信息</h3>
         <p>可领取奖励: {{ formattedUserReward }} GLD2</p>
+        <p>实时累计奖励: {{ accumulatedReward.toFixed(6) }} GLD2</p>
+         <!-- <p>合约原始值: {{ ethers.formatEther(rawReward) }} GLD2</p> -->
         <button @click="getReward" :disabled="isClaiming || formattedUserReward <= 0">
           {{ isClaiming ? '处理中...' : '领取奖励' }}
         </button>
@@ -85,6 +87,12 @@ const withdrawAmount = ref(0); // 绑定输入框的提现数量（用户输入�
 const isWithdrawing = ref(false); // 提现操作的加载状态（防止重复提交）
 const isClaiming = ref(false); // 领取奖励操作的加载状态
 const transactionHash = ref(''); // 存储交易哈希（供用户查询区块链交易）// 领取奖励操作的加载状态
+
+// 新增响应式变量
+const accumulatedReward = ref(0); // 累计奖励
+const lastUpdateTime = ref(0); // 最后更新时间戳
+const rewardRate = ref(0); // 从合约读取的奖励速率
+
 // 提现做法
 const withdraw = async () => {
   try {
@@ -180,27 +188,70 @@ const refreshReward = async () => {
   if (stakingContract.value && signer.value?.address) {
     console.log('进入手动刷新判断stakingContract.value',stakingContract.value);
     console.log('进入手动刷新判断signer.value.address', signer.value.address);
-    let res = await fetchReward(stakingContract.value, signer.value.address);
-    console.log('刷新手动', res);
+    await fetchReward(stakingContract.value, signer.value.address);
+
+    const { raw, accumulated } = await fetchRewardData(); // 获取奖励的原始值及累计值
+    console.log('当前奖励:', { 原始值: raw, 累计值: accumulated });
   } else {
     console.log(stakingContract.value,  signer.value?.address)
   }
 };
 
+// 获取合约数据的方法
+const fetchRewardData = async () => {
+  if (!stakingContract.value || !signer.value?.address) return;
+  
+  // 1. 获取当前已产生但未领取的奖励
+  const currentEarned = await stakingContract.value.earned(signer.value.address);
+  
+  // 2. 获取合约全局参数
+  const [rate, lastUpdate] = await Promise.all([
+    stakingContract.value.rewardRate(),
+    // stakingContract.value.lastUpdateTime()
+  ]);
+  
+  rewardRate.value = ethers.formatEther(rate);
+  lastUpdateTime.value = Number(lastUpdate);
+  
+  // 3. 计算新增奖励（基于时间差）
+  const timeElapsed = Math.floor(Date.now() / 1000) - lastUpdateTime.value;
+  const newReward = timeElapsed * parseFloat(rewardRate.value);
+  
+  // 4. 更新累计奖励（仅当有新奖励时）
+  if (newReward > 0) {
+    accumulatedReward.value += newReward;
+  }
+  
+  return {
+    raw: ethers.formatEther(currentEarned),
+    accumulated: accumulatedReward.value
+  };
+};
+
+// 实时刷新逻辑
+let refreshInterval;
+const startRefresh = () => {
+  refreshInterval = setInterval(async () => {
+    const { raw, accumulated } = await fetchRewardData();
+    console.log('当前奖励:', { 原始值: raw, 累计值: accumulated });
+  }, 1000);
+};
+
 // 组件挂载时启动自动刷新
 onMounted(() => {
   if (isConnected.value) {
-    startAutoRefresh();
+    // startAutoRefresh();
   }
+  // startRefresh();
 });
-
+// onUnmounted(() => clearInterval(refreshInterval));
 // 监听钱包连接状态
 watch(isConnected, (connected) => {
-  if (connected) {
-    startAutoRefresh();
-  } else {
-    stopRewardRefresh();
-  }
+  // if (connected) {
+  //   startAutoRefresh();
+  // } else {
+  //   stopRewardRefresh();
+  // }
 });
 /* 
 关键点：

@@ -139,10 +139,10 @@ export function useStaking() {
   // 获取奖励金额的方法
   const fetchReward = async (stakingContract, account) => {
     if (!stakingContract || !account) return;
-    console.log(111111,stakingContract)
-    console.log(222222, account)
+    console.log(111111,stakingContract) // 合约
+    console.log(222222, account) // 账户
     try {
-      const reward = await stakingContract.earned(account);
+      const reward = await stakingContract.earned(account); 
       rewardAmount.value = ethers.formatEther(reward);
       console.log(23232323, rewardAmount);
     } catch (err) {
