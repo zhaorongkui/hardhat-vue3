@@ -68,6 +68,8 @@ const {
   token2Contract,
   signer,
 
+  currentAccount,
+
   rewardAmount, // 新增的响应式奖励金额
   startRewardRefresh,
   stopRewardRefresh,
@@ -186,6 +188,16 @@ const startAutoRefresh = () => {
 // 手动刷新
 const refreshReward = async () => {
   if (stakingContract.value && signer.value?.address) {
+    console.log(stakingContract.value);
+    console.log(currentAccount.value);
+    await stakingStore.updateUserInfo(stakingContract.value, currentAccount.value); // 更新用户质押信息
+    await stakingStore.updateGlobalInfo(stakingContract.value); // 更新全局质押统计
+    await stakingStore.updateTokenBalances( // 更新代币余额
+      token1Contract.value,
+      token2Contract.value,
+      currentAccount.value
+    );
+
     console.log('进入手动刷新判断stakingContract.value',stakingContract.value);
     console.log('进入手动刷新判断signer.value.address', signer.value.address);
     await fetchReward(stakingContract.value, signer.value.address);

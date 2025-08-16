@@ -61,8 +61,8 @@ token2Address：作为奖励发放的代币（奖励物）。
   作用：设置奖励发放的持续时间（这里是 7 天，单位为秒）。
   即：奖励池中的 Token2 会在 7 天内匀速发放给质押者。 */
   // 设置奖励持续时间
-  // const durationTx = await staking.setRewardsDuration(7 * 24 * 60 * 60);
-  const durationTx = await staking.setRewardsDuration(15 * 60); // 1小时内匀速发放给质押者
+  const durationTx = await staking.setRewardsDuration(7 * 24 * 60 * 60); // 一周内
+  // const durationTx = await staking.setRewardsDuration(15 * 60); // 15分钟内匀速发放给质押者
   await durationTx.wait();
   console.log("Rewards duration set to 7 days");
   
