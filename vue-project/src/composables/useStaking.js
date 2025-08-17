@@ -2,13 +2,13 @@ import { ref, onMounted, onUnmounted } from 'vue';
 import { ethers } from 'ethers';
 import detectEthereumProvider from '@metamask/detect-provider';
 
-import StakingRewards from '../../../artifacts/contracts/StakingSward..sol/StakingRewards.json';
-import Token1 from '../../../artifacts/contracts/Token1.sol/Token1.json';
-import Token2 from '../../../artifacts/contracts/Token2.sol/Token2.json';
+// import StakingRewards from '../../../artifacts/contracts/StakingSward..sol/StakingRewards.json';
+// import Token1 from '../../../artifacts/contracts/Token1.sol/Token1.json';
+// import Token2 from '../../../artifacts/contracts/Token2.sol/Token2.json';
 
-// import StakingRewards from '@/contracts/StakingRewards.json';
-// import Token1 from '@/contracts/Token1.json';
-// import Token2 from '@/contracts/Token2.json';
+import StakingRewards from '@/contracts/StakingRewards.json';
+import Token1 from '@/contracts/Token1.json';
+import Token2 from '@/contracts/Token2.json';
 
 // import StakingRewards from '@artifacts/contracts/StakingRewards.json';
 // import Token1 from '@artifacts/contracts/Token1.sol/Token1.json';
@@ -85,25 +85,26 @@ export function useStaking() {
       // 7. 初始化合约
       console.log(1111111, contractAddresses.StakingRewards, );
       console.log(2222222, freshSigner );
-      console.log(33333333, StakingRewards.abi );
+      console.log(33333333, StakingRewards );
+      console.log(44444444, StakingRewards.output.abi );
       // 初始化三个智能合约实例（质押合约、代币 1 合约、代币 2 合约）
       stakingContract.value = new ethers.Contract(
         contractAddresses.StakingRewards,
-        StakingRewards.abi,
+        StakingRewards.output.abi,
         freshSigner // 使用新鲜signer实例
       )
       console.log(stakingContract.value);
       token1Contract.value = new ethers.Contract(
         contractAddresses.Token1,
-        Token1.abi,
+        Token1.output.abi,
         freshSigner
       )
       console.log('token1', contractAddresses.Token1);
-      console.log('token1ABI', Token1.abi);
+      console.log('token1ABI', Token1.output.abi);
       console.log('token1Contract', token1Contract.value);
       token2Contract.value = new ethers.Contract(
         contractAddresses.Token2,
-        Token2.abi,
+        Token2.output.abi,
         freshSigner
       )
       console.log( 'token2',contractAddresses.Token2);

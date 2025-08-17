@@ -11,7 +11,7 @@
         <p>当前 GLD1 余额: {{ ethers.formatEther(token1Balance) }}</p>
       </div>
 
-      <div class="stake-form">
+      <!-- <div class="stake-form">
         <input
           v-model="stakeAmount"
           type="number"
@@ -25,6 +25,107 @@
         </button>
         <button @click="stake" :disabled="isStaking || stakeAmount <= 0">
           {{ isStaking ? '处理中...' : '质押' }}
+        </button>
+      </div> -->
+
+      <div class="stake-form">
+        <input
+          v-model="stakeToken1"
+          type="number"
+          placeholder="输入Token1"
+          min="0"
+          step="1"
+        />
+        <button @click="setStakeToken1">
+          {{ 'Token1' }}
+        </button>
+      </div>
+      <div class="stake-form">
+        <input
+          v-model="stakeToken2"
+          type="number"
+          placeholder="输入Token2"
+          min="0"
+          step="1"
+        />
+        <button @click="setStakeToken2">
+          {{ '2、Token2.mint()' }}
+        </button>
+      </div>
+      <div class="stake-form">
+        <input
+          v-model="stakeTime"
+          type="number"
+          placeholder="输入质押时间"
+          min="0"
+          step="1"
+        />
+        <button @click="setStakeTime">
+          {{ '1、设置质押时间' }}
+        </button>
+        
+        <button @click="depStakingReward">
+          {{ 'StakingReward部署 ' }}
+        </button>
+      </div>
+      <div class="stake-form">
+        <input
+          v-model="balanceOfValue"
+          type="number"
+          placeholder="输入查询地址"
+          min="0"
+          step="1"
+        />
+        <button @click="getBalanceOf">
+          {{ '3、查看balanceOf' }}
+        </button>
+      </div>
+      <div class="stake-form">
+        <input
+          v-model="notifyRewardAmountValue"
+          type="number"
+          placeholder="4、输入奖励参数（速率）"
+          min="0"
+          step="1"
+        />
+        <button @click="notifyRewardAmount">
+          {{ '设置奖励参数' }}
+        </button>
+      </div>
+      <div class="stake-form">
+        <input
+          v-model="mintValue"
+          type="number"
+          placeholder="输入"
+          min="0"
+          step="1"
+        />
+        <button @click="setMint">
+          {{ 'mint' }}
+        </button>
+      </div>
+      <div class="stake-form">
+        <input
+          v-model="approveValue"
+          type="number"
+          placeholder="输入"
+          min="0"
+          step="1"
+        />
+        <button @click="setApprove">
+          {{ 'approve' }}
+        </button>
+      </div>
+      <div class="stake-form">
+        <input
+          v-model="stakeValue"
+          type="number"
+          placeholder="输入"
+          min="0"
+          step="1"
+        />
+        <button @click="userStake">
+          {{ '用户开始质押stake' }}
         </button>
       </div>
 
@@ -51,6 +152,7 @@ import { useStaking } from '@/composables/useStaking'; // 引入钱包连接相�
 import { useStakingStore } from '@/stores/staking'; // 引入 Pinia 状态管理（存储代币余额等全局状态）
 import { storeToRefs } from 'pinia'; // 将 Pinia 状态转为响应式引用
 import { ethers } from 'ethers'; // Vue 核心 API 和以太坊工具库
+import contractAddresses from '@/contracts/contract-addresses.json';
 
 const {
   isConnected,
@@ -58,6 +160,8 @@ const {
   connectWallet,
   stakingContract,
   token1Contract,
+  token2Contract,
+  signer,
   error
 } = useStaking(); // 从 useStaking 获取钱包连接状态、合约实例等
 
@@ -69,6 +173,15 @@ const isApproving = ref(false); // 批准操作的加载状态（防止重复提
 const isStaking = ref(false); // 质押操作的加载状态
 const transactionHash = ref(''); // 存储交易哈希（供用户查询交易）
 const approvalNeeded = ref(false); // 标记是否需要批准代币使用权限（ERC20 机制）
+
+const stakeTime = ref(1000) // 质押时间（默认1000）
+const stakeToken1 = ref(0) // 设置Token1质押币（默认1000）
+const stakeToken2 = ref(0) // 设置Token2质押币（默认1000）
+const balanceOfValue = ref(0) // 查询当前账号余额
+const notifyRewardAmountValue = ref(0) // 查询当前账号余额
+const mintValue = ref(0) // 设置mint
+const approveValue = ref(0) // 设置授权数量
+const stakeValue = ref(0) // 开始质押数量
 
 const checkAllowance = async () => {
   // 确保合约实例和账户地址有效
@@ -165,6 +278,48 @@ const stake = async () => {
     isStaking.value = false; // 结束加载状态
   }
 };
+// 第一步：设置质押时间
+const setStakeTime = async() => {
+// console.log(stakeTime.value);
+// console.log(stakingContract.value.setRewardsDuration);
+const res = await stakingContract.value.setRewardsDuration(stakeTime.value);
+console.log(res);
+};
+// 第二步：token2 设置质押币
+const setStakeToken2 = async() => {
+console.log(contractAddresses.StakingRewards)
+console.log(stakeToken2.value)
+   await token2Contract.value.mint(contractAddresses.StakingRewards, stakeToken2.value);
+}
+// 部署takingReward 合约
+const depStakingReward = () => {
+
+}
+// 第三步：查询当前账户下余额
+const getBalanceOf = async() => {
+console.log(contractAddresses.StakingRewards);
+balanceOfValue.value = await stakingContract.value.balanceOf(contractAddresses.StakingRewards);
+console.log('balanceOfValue', balanceOfValue);
+}
+// 第四步：设置奖励速率（1000个 ）之后切换账户
+const notifyRewardAmount = async () => {
+  await stakingContract.value.notifyRewardAmount(notifyRewardAmountValue.value);
+}
+// Token1:(mint(切换后新账户地址，1000)) // 分配质押代币
+const setMint = async() => {
+ await token1Contract.value.mint(signer.address, mintValue);
+}
+
+// 第六步：token1授权给质押合约代币权限1000
+const setApprove = async() => {
+  await token1Contract.value.approve(contractAddresses.StakingRewards, approveValue.value);
+}
+
+// 第七步：用户开始操作质押合约，调用stake 方法开始去质押了
+
+const userStake = async () => {
+  await stakingContract.value.stake(stakeValue.value);
+}
 
 // 错误解析工具函数 将区块链交易 / 合约调用的原始错误转换为用户友好的提示。
 const parseContractError = (err) => {

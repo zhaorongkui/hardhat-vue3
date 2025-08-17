@@ -24,7 +24,47 @@
           {{ isWithdrawing ? '处理中...' : '提现' }}
         </button>
       </div>
-      
+
+      <div class="withdraw-form">
+        <input 
+          v-model="rewardValue" 
+          type="number" 
+          placeholder="查询最新rewardValue"
+          :max="formattedUserStaked"
+          min="0"
+          step="0.1"
+        >
+        <button @click="getRewardValue" >
+          {{ '提现' }}
+        </button>
+      </div>
+      <div class="withdraw-form">
+        <input 
+          v-model="token1mintValue" 
+          type="number" 
+          placeholder="查询最新balance"
+          :max="formattedUserStaked"
+          min="0"
+          step="0.1"
+        >
+        <button @click="token1mint" >
+          {{ '切换后Token1,设置mint' }}
+        </button>
+      </div>
+      <div class="withdraw-form">
+        <input 
+          v-model="balanceOfValue" 
+          type="number" 
+          placeholder="查询最新balance"
+          :max="formattedUserStaked"
+          min="0"
+          step="0.1"
+        >
+        <button @click="getBalanceOf" >
+          {{ '切换后balanceOf' }}
+        </button>
+      </div>
+     
       <div class="reward-section">
         <h3>奖励信息</h3>
         <p>可领取奖励: {{ formattedUserReward }} GLD2</p>
@@ -34,7 +74,7 @@
           {{ isClaiming ? '处理中...' : '领取奖励' }}
         </button>
 
-        <button style="margin-left:15px;" @click="refreshReward">
+        <button style="margin-left:15px;" @click="earned">
           {{ '更新奖励' }}
         </button>
       </div>
@@ -94,6 +134,10 @@ const transactionHash = ref(''); // 存储交易哈希（供用户查询区块�
 const accumulatedReward = ref(0); // 累计奖励
 const lastUpdateTime = ref(0); // 最后更新时间戳
 const rewardRate = ref(0); // 从合约读取的奖励速率
+
+const balanceOfValue = ref(0); // 
+const rewardValue = ref(0); // 
+const token1mintValue = ref(0); // 
 
 // 提现做法
 const withdraw = async () => {
@@ -248,6 +292,28 @@ const startRefresh = () => {
     console.log('当前奖励:', { 原始值: raw, 累计值: accumulated });
   }, 1000);
 };
+// 第八步：实时获取最新的奖励
+const earned = async() => {
+  console.log(signer.value.address);
+ const res = await stakingContract.value.earned(signer.value.address);
+ console.log(res);
+}
+// 第十步：体现（没有参数）
+const getRewardValue = async() => {
+  const res = await stakingContract.value.getReward();
+ console.log(res);
+}
+
+// 第九步、第十一步：查看token2 当前账户的收益余额
+const getBalanceOf = async() => {
+  const res = await token2Contract.value.balanceOf(signer.value.address); 
+  console.log(res);
+}
+// 第五步
+// 切换后token1  执行mint （账户地址，1000）
+const token1mint = async() => {
+  await token1Contract.value.mint(signer.value.address, token1mintValue.value); 
+}
 
 // 组件挂载时启动自动刷新
 onMounted(() => {
