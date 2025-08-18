@@ -169,6 +169,12 @@ export function useStaking() {
     }
   };
 
+  // 转换成 wei  // 转换单位：质押金额需为 wei
+const changeAmount = (data) => {
+  const stakeAmountValue = ethers.parseEther(data.toString()); 
+  return stakeAmountValue;
+}
+
   // 组件卸载时自动清理
   onUnmounted(stopRewardRefresh);
   
@@ -188,7 +194,8 @@ export function useStaking() {
     // 以下是新增的
     fetchReward,
     startRewardRefresh,
-    stopRewardRefresh
+    stopRewardRefresh,
+    changeAmount // ETH单位转换方法
   };
 }
 

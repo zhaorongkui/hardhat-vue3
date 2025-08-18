@@ -35,7 +35,7 @@
           step="0.1"
         >
         <button @click="getRewardValue" >
-          {{ '提现' }}
+          {{ '提现getReward' }}
         </button>
       </div>
       <div class="withdraw-form">
@@ -75,7 +75,7 @@
         </button>
 
         <button style="margin-left:15px;" @click="earned">
-          {{ '更新奖励' }}
+          {{ '更新奖励-earned' }}
         </button>
       </div>
       
@@ -107,7 +107,7 @@ const {
   token1Contract,
   token2Contract,
   signer,
-
+  changeAmount,
   currentAccount,
 
   rewardAmount, // 新增的响应式奖励金额
@@ -294,8 +294,8 @@ const startRefresh = () => {
 };
 // 第八步：实时获取最新的奖励
 const earned = async() => {
-  console.log(signer.value.address);
- const res = await stakingContract.value.earned(signer.value.address);
+  console.log('当前账户地址:', signer.value.address);
+ const res = await stakingContract.value.earned(signer.value.address); // 当前账户地址
  console.log(res);
 }
 // 第十步：体现（没有参数）
@@ -312,7 +312,7 @@ const getBalanceOf = async() => {
 // 第五步
 // 切换后token1  执行mint （账户地址，1000）
 const token1mint = async() => {
-  await token1Contract.value.mint(signer.value.address, token1mintValue.value); 
+  await token1Contract.value.mint(signer.value.address, changeAmount(token1mintValue.value)); 
 }
 
 // 组件挂载时启动自动刷新

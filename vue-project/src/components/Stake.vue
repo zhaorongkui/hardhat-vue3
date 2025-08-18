@@ -89,7 +89,7 @@
           step="1"
         />
         <button @click="notifyRewardAmount">
-          {{ '设置奖励参数' }}
+          {{ '设置奖励参数notifyRewardAmount' }}
         </button>
       </div>
       <div class="stake-form">
@@ -161,6 +161,7 @@ const {
   stakingContract,
   token1Contract,
   token2Contract,
+  changeAmount,
   signer,
   error
 } = useStaking(); // 从 useStaking 获取钱包连接状态、合约实例等
@@ -278,6 +279,7 @@ const stake = async () => {
     isStaking.value = false; // 结束加载状态
   }
 };
+
 // 第一步：设置质押时间
 const setStakeTime = async() => {
 // console.log(stakeTime.value);
@@ -288,37 +290,44 @@ console.log(res);
 // 第二步：token2 设置质押币
 const setStakeToken2 = async() => {
 console.log(contractAddresses.StakingRewards)
-console.log(stakeToken2.value)
-   await token2Contract.value.mint(contractAddresses.StakingRewards, stakeToken2.value);
+console.log(changeAmount(stakeToken2.value))
+   await token2Contract.value.mint(contractAddresses.StakingRewards, changeAmount(stakeToken2.value));
 }
 // 部署takingReward 合约
 const depStakingReward = () => {
 
 }
-// 第三步：查询当前账户下余额
+// 第三步：查询当前账户下余额 // 是token2合约调用balanceOf 方法去查询
 const getBalanceOf = async() => {
 console.log(contractAddresses.StakingRewards);
-balanceOfValue.value = await stakingContract.value.balanceOf(contractAddresses.StakingRewards);
-console.log('balanceOfValue', balanceOfValue);
+balanceOfValue.value = await token2Contract.value.balanceOf(contractAddresses.StakingRewards);
+console.log('balanceOfValue', balanceOfValue.value);
 }
-// 第四步：设置奖励速率（1000个 ）之后切换账户
+// 第四步：设置奖励速率（1000个wei ）之后切换账户
 const notifyRewardAmount = async () => {
-  await stakingContract.value.notifyRewardAmount(notifyRewardAmountValue.value);
+  await stakingContract.value.notifyRewardAmount(changeAmount(notifyRewardAmountValue.value));
 }
 // Token1:(mint(切换后新账户地址，1000)) // 分配质押代币
 const setMint = async() => {
- await token1Contract.value.mint(signer.address, mintValue);
+ await token1Contract.value.mint(signer.address, changeAmount(mintValue.value));
 }
 
-// 第六步：token1授权给质押合约代币权限1000
+// 第六步：token1授权给质押合约代币权限1000wei
 const setApprove = async() => {
-  await token1Contract.value.approve(contractAddresses.StakingRewards, approveValue.value);
+  await token1Contract.value.approve(contractAddresses.StakingRewards, changeAmount(approveValue.value));
 }
 
 // 第七步：用户开始操作质押合约，调用stake 方法开始去质押了
 
 const userStake = async () => {
-  await stakingContract.value.stake(stakeValue.value);
+  // await stakingContract.value.stake(stakeValue.value);
+   if (!currentAccount.value) return;
+  // 转换单位：质押金额需为 wei
+  const stakeAmount = ethers.parseEther(stakeValue.value.toString()); 
+  console.log(stakeAmount);
+  const tx = await stakingContract.value.stake(stakeAmount);
+  await tx.wait(); // 等待区块链确认
+  console.log("质押成功，已更新质押余额");
 }
 
 // 错误解析工具函数 将区块链交易 / 合约调用的原始错误转换为用户友好的提示。

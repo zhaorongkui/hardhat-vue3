@@ -241,7 +241,7 @@
 					},
 					{
 						"internalType": "uint256",
-						"name": "amound",
+						"name": "amount",
 						"type": "uint256"
 					}
 				],
@@ -501,11 +501,11 @@
 			]
 		},
 		"contracts/staking/Token1.sol": {
-			"keccak256": "0x844e76f3f170d3ea134c7b70316cfe456c1f46801357010482b36068413267e5",
+			"keccak256": "0x7bb218778ad8082ffaa67c0238d2a3928e8ab1bd9a6b610cfb0f8e63386d62d7",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://e356a74142885164833f0de62183ccf0be4d93fdf15752de03a610ab5e5c3508",
-				"dweb:/ipfs/QmNmr7kFsxuPzhTFmXq4fFLRLtMQCBJxfuRbp49JKBjCBS"
+				"bzz-raw://6619155d1e170cc0976bc8a5970f574327bf4407fbe0381ee808849e882d01c2",
+				"dweb:/ipfs/QmXpKyUu54dszFRnw7q61YVVXCC7ETK87Gp3XTY2Xi4yR7"
 			]
 		}
 	},
